@@ -9,7 +9,7 @@ fn main() {
     let folder: String = args[2].parse().unwrap();
     let video_ids = download_page(&link)
         .and_then(|page| parse_pages_count(&page))
-        .map(|pages_count| download_all_pages(&link, pages_count))
+        .map(|pages_count| get_video_ids(&link, pages_count))
         .unwrap();
     println!("{:?}", video_ids);
 }
@@ -33,12 +33,18 @@ fn parse_pages_count(document: &Document) -> Option<u32> {
         .max();
 }
 
-fn download_all_pages(link: &String, pages_count: u32) -> Vec<u32> {
+fn get_video_ids(link: &String, pages_count: u32) -> Vec<u32> {
+    download_all_pages(link, pages_count)
+        .iter()
+        .flat_map(|doc| parse_video_ids(&doc))
+        .collect()
+}
+
+fn download_all_pages(link: &String, pages_count: u32) -> Vec<Document> {
     (1..=pages_count)
         .map(|page| format!("{}&page={}", link, page))
-        .flat_map(|page_link| {
-            download_page(&page_link).map_or(Vec::new(), |doc| parse_video_ids(&doc))
-        })
+        .map(|page_link| download_page(&page_link))
+        .filter_map(|r| r)
         .collect()
 }
 
