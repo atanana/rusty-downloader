@@ -5,3 +5,4 @@ authors = ["Andrei Tanana <andrei.tanana@deltatre.it>"]
 edition = "2018"
 
 [dependencies]
+reqwest = "0.9.6"
