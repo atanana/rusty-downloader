@@ -1,0 +1,7 @@
+[package]
+name = "rusty-downloader"
+version = "0.1.0"
+authors = ["Andrei Tanana <andrei.tanana@deltatre.it>"]
+edition = "2018"
+
+[dependencies]
