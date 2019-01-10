@@ -1,21 +1,28 @@
 use reqwest;
 use select::document::Document;
-use select::predicate::{Attr, Class, Name, Predicate};
+use select::predicate::{Class, Name, Predicate};
 use std::env;
+
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde;
+extern crate serde_json;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let link: String = args[1].parse().unwrap();
-    let folder: String = args[2].parse().unwrap();
-    // download_videos(&link, &folder);
-    let page = download_page(&link).unwrap();
-    parse_video_ids(&page);
+    let page_link: String = args[1].parse().unwrap();
+    let download_link: String = args[2].parse().unwrap();
+    let folder: String = args[3].parse().unwrap();
+    // download_videos(&page_link, &download_link, &folder);
+    let client = reqwest::Client::new();
+    get_download_link(&client, &download_link, 788911);
 }
 
-fn download_videos(link: &String, folder: &String) {
-    let video_ids = download_page(&link)
+fn download_videos(page_link: &String, download_link: &String, folder: &String) {
+    let video_ids = download_page(&page_link)
         .and_then(|page| parse_pages_count(&page))
-        .map(|pages_count| get_video_ids(&link, pages_count))
+        .map(|pages_count| get_video_ids(&page_link, pages_count))
         .unwrap();
     println!("{:?}", video_ids);
 }
@@ -60,4 +67,26 @@ fn parse_video_ids(document: &Document) -> Vec<u32> {
     return document.find(link_selector)
         .flat_map(|link| link.attr("data-id").and_then(|id| id.parse::<u32>().ok()))
         .collect();
+}
+
+#[derive(Deserialize, Debug)]
+struct DownloadResponse {
+    url: String,
+    zona: bool
+}
+
+fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: u32) -> String {
+    let params = [
+        ("id", "788911"),
+        ("type", "mp4")
+        ];
+    let mut resp = client.post(download_link)
+        .form(&params)
+        .send()
+        .unwrap();
+    let j:DownloadResponse = resp.json().unwrap();
+
+    println!("{:?}", j);
+
+    return String::from("");
 }
