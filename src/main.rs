@@ -16,7 +16,8 @@ fn main() {
     let folder: String = args[3].parse().unwrap();
     // download_videos(&page_link, &download_link, &folder);
     let client = reqwest::Client::new();
-    get_download_link(&client, &download_link, 788911);
+    let link = get_download_link(&client, &download_link, 788911).unwrap();
+    println!("{}", link);
 }
 
 fn download_videos(page_link: &String, download_link: &String, folder: &String) {
@@ -75,18 +76,15 @@ struct DownloadResponse {
     zona: bool
 }
 
-fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: u32) -> String {
+fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: u32) -> Option<String> {
     let params = [
         ("id", "788911"),
         ("type", "mp4")
-        ];
-    let mut resp = client.post(download_link)
+    ];
+    return client.post(download_link)
         .form(&params)
         .send()
-        .unwrap();
-    let j:DownloadResponse = resp.json().unwrap();
-
-    println!("{:?}", j);
-
-    return String::from("");
+        .ok()
+        .and_then(|mut response| response.json::<DownloadResponse>().ok())
+        .map(|json| json.url);
 }
