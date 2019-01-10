@@ -7,6 +7,12 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let link: String = args[1].parse().unwrap();
     let folder: String = args[2].parse().unwrap();
+    // download_videos(&link, &folder);
+    let page = download_page(&link).unwrap();
+    parse_video_ids(&page);
+}
+
+fn download_videos(link: &String, folder: &String) {
     let video_ids = download_page(&link)
         .and_then(|page| parse_pages_count(&page))
         .map(|pages_count| get_video_ids(&link, pages_count))
@@ -49,5 +55,9 @@ fn download_all_pages(link: &String, pages_count: u32) -> Vec<Document> {
 }
 
 fn parse_video_ids(document: &Document) -> Vec<u32> {
-    vec![0]
+    let link_selector = Class("list-video-result")
+        .descendant(Name("a"));
+    return document.find(link_selector)
+        .flat_map(|link| link.attr("data-id").and_then(|id| id.parse::<u32>().ok()))
+        .collect();
 }
