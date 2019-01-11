@@ -104,7 +104,10 @@ fn get_download_link(client: &reqwest::Client, download_link: &String, video_id:
 }
 
 fn download_video(link: &String, video_id: u32, folder_name: &String) -> Result<u64, io::Error> {
-    let mut response = reqwest::get(link).unwrap();
+    let mut response = match reqwest::get(link) {
+        Ok(response) => response,
+        Err(e) => return Err(io::Error::new(io::ErrorKind::ConnectionRefused, e))
+    };
     let mut dest = {
         let path = Path::new(folder_name).join(format!("{}.mp4", video_id));
         fs::File::create(path)?
