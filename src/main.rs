@@ -1,13 +1,10 @@
+#[macro_use]
+extern crate serde_derive;
+
 use reqwest;
 use select::document::Document;
 use select::predicate::{Class, Name, Predicate};
 use std::env;
-
-#[macro_use]
-extern crate serde_derive;
-
-extern crate serde;
-extern crate serde_json;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -73,7 +70,7 @@ fn parse_video_ids(document: &Document) -> Vec<u32> {
 #[derive(Deserialize, Debug)]
 struct DownloadResponse {
     url: String,
-    zona: bool
+    zona: bool,
 }
 
 fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: u32) -> Option<String> {
