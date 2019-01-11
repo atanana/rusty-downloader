@@ -21,13 +21,16 @@ fn test(download_link: &String, folder_name: &String) {
     let video_id = 788911;
     let client = reqwest::Client::new();
     let link = get_download_link(&client, download_link, video_id).unwrap();
+    download_video(&link, video_id, folder_name);
+}
 
-    let mut response = reqwest::get(&link).unwrap();
+fn download_video(link: &String, video_id: u32, folder_name: &String) -> Result<u64, io::Error> {
+    let mut response = reqwest::get(link).unwrap();
     let mut dest = {
         let path = Path::new(folder_name).join(format!("{}.mp4", video_id));
-        fs::File::create(path).unwrap()
+        fs::File::create(path)?
     };
-    io::copy(&mut response, &mut dest).unwrap();
+    return io::copy(&mut response, &mut dest);
 }
 
 fn download_videos(page_link: &String, download_link: &String, folder: &String) {
