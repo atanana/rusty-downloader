@@ -91,8 +91,8 @@ struct DownloadResponse {
 
 fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: u32) -> Option<String> {
     let params = [
-        ("id", "788911"),
-        ("type", "mp4")
+        ("id", video_id.to_string()),
+        ("type", "mp4".to_owned())
     ];
     return client.post(download_link)
         .form(&params)
