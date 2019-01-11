@@ -5,16 +5,29 @@ use reqwest;
 use select::document::Document;
 use select::predicate::{Class, Name, Predicate};
 use std::env;
+use std::fs;
+use std::io;
+use std::path::Path;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let page_link: String = args[1].parse().unwrap();
     let download_link: String = args[2].parse().unwrap();
-    let folder: String = args[3].parse().unwrap();
-    // download_videos(&page_link, &download_link, &folder);
+    let folder_name: String = args[3].parse().unwrap();
+    test(&download_link, &folder_name);
+}
+
+fn test(download_link: &String, folder_name: &String) {
+    let video_id = 788911;
     let client = reqwest::Client::new();
-    let link = get_download_link(&client, &download_link, 788911).unwrap();
-    println!("{}", link);
+    let link = get_download_link(&client, download_link, video_id).unwrap();
+
+    let mut response = reqwest::get(&link).unwrap();
+    let mut dest = {
+        let path = Path::new(folder_name).join(format!("{}.mp4", video_id));
+        fs::File::create(path).unwrap()
+    };
+    io::copy(&mut response, &mut dest).unwrap();
 }
 
 fn download_videos(page_link: &String, download_link: &String, folder: &String) {
