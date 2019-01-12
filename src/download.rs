@@ -7,7 +7,11 @@ use std::path::Path;
 pub fn download_page(link: &String) -> Option<Document> {
     reqwest::get(link)
         .ok()
-        .and_then(|page| Document::from_read(page).ok())
+        .and_then(parse_page)
+}
+
+fn parse_page(mut response: reqwest::Response) -> Option<Document> {
+    Document::from_read(response).ok()
 }
 
 pub fn download_video(link: &String, video_id: u32, folder_name: &String) -> Result<u64, io::Error> {
