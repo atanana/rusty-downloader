@@ -14,7 +14,7 @@ fn parse_page(mut response: reqwest::Response) -> Option<Document> {
     Document::from_read(response).ok()
 }
 
-pub fn download_video(link: &String, video_id: u32, folder_name: &String) -> Result<u64, io::Error> {
+pub fn download_video(link: &String, video_id: &u32, folder_name: &String) -> Result<u64, io::Error> {
     let mut response = match reqwest::get(link) {
         Ok(response) => response,
         Err(e) => return Err(io::Error::new(io::ErrorKind::ConnectionRefused, e))
@@ -32,7 +32,7 @@ struct DownloadResponse {
     zona: bool,
 }
 
-pub fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: u32) -> Option<String> {
+pub fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: &u32) -> Option<String> {
     let params = [
         ("id", video_id.to_string()),
         ("type", "mp4".to_owned())

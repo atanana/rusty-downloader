@@ -29,8 +29,8 @@ fn parse_args() -> Result<(String, String, String), Box<Error>> {
 fn test(download_link: &String, folder_name: &String) {
     let video_id = 788911;
     let client = reqwest::Client::new();
-    let link = download::get_download_link(&client, download_link, video_id).unwrap();
-    download::download_video(&link, video_id, folder_name);
+    let link = download::get_download_link(&client, download_link, &video_id).unwrap();
+    download::download_video(&link, &video_id, folder_name);
 }
 
 fn download_videos(page_link: &String, download_link: &String, folder: &String) {
