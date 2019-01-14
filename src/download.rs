@@ -1,8 +1,7 @@
 use reqwest;
 use select::document::Document;
-use std::fs;
 use std::fs::File;
-use std::io::{ErrorKind, copy};
+use std::io::copy;
 use std::path::Path;
 use std::error::Error;
 
@@ -12,7 +11,7 @@ pub fn download_page(link: &String) -> Option<Document> {
         .and_then(parse_page)
 }
 
-fn parse_page(mut response: reqwest::Response) -> Option<Document> {
+fn parse_page(response: reqwest::Response) -> Option<Document> {
     Document::from_read(response).ok()
 }
 

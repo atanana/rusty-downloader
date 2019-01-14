@@ -26,12 +26,6 @@ fn parse_args() -> Result<(String, String, String), Box<Error>> {
     return Ok((page_link, download_link, folder_name));
 }
 
-fn test(download_link: &String, folder_name: &String) {
-    let video_id = 788911;
-    let client = reqwest::Client::new();
-    download::download_video(&client, download_link, &video_id, folder_name);
-}
-
 fn download_videos(page_link: &String, download_link: &String, folder_name: &String) {
     let pages_count = download::download_page(&page_link)
         .and_then(|page| parse::parse_pages_count(&page))
