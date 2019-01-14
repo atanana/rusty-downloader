@@ -12,7 +12,7 @@ use std::error::Error;
 fn main() {
     match parse_args() {
         Ok((page_link, download_link, folder_name)) => {
-            test(&download_link, &folder_name);
+            download_videos(&page_link, &download_link, &folder_name);
         }
         _ => panic!("Incorrect arguments!")
     }
@@ -32,12 +32,12 @@ fn test(download_link: &String, folder_name: &String) {
     download::download_video(&client, download_link, &video_id, folder_name);
 }
 
-fn download_videos(page_link: &String, download_link: &String, folder: &String) {
-    let video_ids = download::download_page(&page_link)
+fn download_videos(page_link: &String, download_link: &String, folder_name: &String) {
+    let pages_count = download::download_page(&page_link)
         .and_then(|page| parse::parse_pages_count(&page))
-        .map(|pages_count| get_video_ids(&page_link, pages_count))
-        .unwrap();
-    println!("{:?}", video_ids);
+        .expect("Cannot get pages count!");
+    let video_ids = get_video_ids(page_link, pages_count);
+    println!("Downloading {} videos", video_ids.len());
 }
 
 fn get_video_ids(link: &String, pages_count: u32) -> Vec<u32> {
