@@ -8,6 +8,7 @@ use reqwest;
 use select::document::Document;
 use std::env;
 use std::error::Error;
+use rayon::prelude::*;
 
 fn main() {
     match parse_args() {
@@ -32,6 +33,15 @@ fn download_videos(page_link: &String, download_link: &String, folder_name: &Str
         .expect("Cannot get pages count!");
     let video_ids = get_video_ids(page_link, pages_count);
     println!("Downloading {} videos", video_ids.len());
+    let client = reqwest::Client::new();
+    video_ids.par_iter()
+        .for_each(|video_id| {
+            println!("Start download video {}", video_id);
+            match download::download_video(&client, download_link, &video_id, folder_name) {
+                Ok(file_name) => println!("Downloaded to {}", file_name),
+                _ => println!("Cannot download {}", video_id)
+            }
+        })
 }
 
 fn get_video_ids(link: &String, pages_count: u32) -> Vec<u32> {
