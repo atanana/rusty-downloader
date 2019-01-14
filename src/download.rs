@@ -1,12 +1,13 @@
-use reqwest;
+use reqwest::Client;
 use select::document::Document;
 use std::fs::File;
 use std::io::copy;
 use std::path::Path;
 use std::error::Error;
 
-pub fn download_page(link: &String) -> Option<Document> {
-    reqwest::get(link)
+pub fn download_page(client: &Client, link: &String) -> Option<Document> {
+    client.get(link)
+        .send()
         .ok()
         .and_then(parse_page)
 }
@@ -21,7 +22,7 @@ struct DownloadResponse {
     zona: bool,
 }
 
-fn get_download_link(client: &reqwest::Client, download_link: &String, video_id: &u32) -> Result<String, Box<Error>> {
+fn get_download_link(client: &Client, download_link: &String, video_id: &u32) -> Result<String, Box<Error>> {
     let params = [
         ("id", video_id.to_string()),
         ("type", String::from("mp4"))
@@ -38,9 +39,9 @@ fn create_file(folder_name: &String, file_name: &String) -> Result<File, Box<Err
     Ok(File::create(path)?)
 }
 
-pub fn download_video(client: &reqwest::Client, download_link: &String, video_id: &u32, folder_name: &String) -> Result<String, Box<Error>> {
+pub fn download_video(client: &Client, download_link: &String, video_id: &u32, folder_name: &String) -> Result<String, Box<Error>> {
     let link = get_download_link(client, download_link, video_id)?;
-    let mut response = reqwest::get(&link)?;
+    let mut response = client.get(&link).send()?;
     let file_name = format!("{}.mp4", video_id);
     let mut file = create_file(folder_name, &file_name)?;
     copy(&mut response, &mut file)?;
