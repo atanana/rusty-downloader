@@ -31,7 +31,7 @@ fn download_videos(page_link: &String, download_link: &String, folder_name: &Str
     let client = Client::new();
     let pages_count = download::download_page(&client, &page_link)
         .and_then(|page| parse::parse_pages_count(&page))
-        .expect("Cannot get pages count!");
+        .unwrap_or(1);
     let video_ids = get_video_ids(&client, page_link, pages_count);
     println!("Downloading {} videos", video_ids.len());
     video_ids.par_iter()
