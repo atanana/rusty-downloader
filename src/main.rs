@@ -7,6 +7,8 @@ mod download;
 use reqwest::Client;
 use select::document::Document;
 use std::env;
+use std::fs;
+use std::path::Path;
 use std::error::Error;
 use rayon::prelude::*;
 
@@ -32,6 +34,8 @@ fn download_videos(page_link: &String, download_link: &String, folder_name: &Str
     let pages_count = download::download_page(&client, &page_link)
         .and_then(|page| parse::parse_pages_count(&page))
         .unwrap_or(1);
+    fs::create_dir_all(Path::new(folder_name))
+        .expect("Cannot create folder for downloads");
     let video_ids = get_video_ids(&client, page_link, pages_count);
     println!("Downloading {} videos", video_ids.len());
     video_ids.par_iter()
