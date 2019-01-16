@@ -35,14 +35,19 @@ fn get_download_link(client: &Client, download_link: &String, video_id: &u32) ->
 }
 
 pub fn download_video(client: &Client, download_link: &String, video_id: &u32, folder_name: &String) -> Result<String, Box<Error>> {
+    let file_name = format!("{}.mp4", video_id);
+    let file_path = Path::new(folder_name).join(&file_name);
+
+    if file_path.exists() {
+        return Ok(file_name);
+    }
+
     let link = get_download_link(client, download_link, video_id)?;
     let mut response = client.get(&link).send()?;
     let tmp_file_name = format!("{}.mp4.tmp", video_id);
     let tmp_path = Path::new(folder_name).join(tmp_file_name);
     let mut tmp_file = File::create(&tmp_path)?;
     copy(&mut response, &mut tmp_file)?;
-    let file_name = format!("{}.mp4", video_id);
-    let file_path = Path::new(folder_name).join(&file_name);
     rename(tmp_path, file_path)?;
     return Ok(file_name);
 }
