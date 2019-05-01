@@ -57,7 +57,7 @@ fn get_video_ids(client: &Client, link: &String, pages_count: u32) -> Vec<u32> {
 
 fn download_all_pages(client: &Client, link: &String, pages_count: u32) -> Vec<Document> {
     (1..=pages_count)
-        .map(|page| format!("{}&page={}", link, page))
+        .map(|page| format!("{}?page={}", link, page))
         .map(|page_link| download::download_page(client, &page_link))
         .filter_map(|r| r)
         .collect()
