@@ -31,10 +31,9 @@ fn parse_args() -> Result<(String, String, String), Box<dyn Error>> {
 
 fn download_videos(page_link: &String, download_link: &String, folder_name: &String) {
     let client = Client::new();
-    let pages_count = get_pages_count(&client, page_link);
     fs::create_dir_all(Path::new(folder_name))
         .expect("Cannot create folder for downloads");
-    let video_ids = get_video_ids(&client, page_link, pages_count);
+    let video_ids = get_video_ids(&client, page_link);
     println!("Downloading {} videos", video_ids.len());
     video_ids.par_iter()
         .for_each(|video_id| {
@@ -46,17 +45,18 @@ fn download_videos(page_link: &String, download_link: &String, folder_name: &Str
         })
 }
 
-fn get_pages_count(client: &Client, page_link: &String) -> u32 {
-    download::download_page(&client, page_link)
-        .and_then(|page| parse::parse_pages_count(&page))
-        .unwrap_or(1)
-}
-
-fn get_video_ids(client: &Client, link: &String, pages_count: u32) -> Vec<u32> {
+fn get_video_ids(client: &Client, link: &String) -> Vec<u32> {
+    let pages_count = get_pages_count(&client, link);
     download_all_pages(client, link, pages_count)
         .iter()
         .flat_map(|doc| parse::parse_video_ids(&doc))
         .collect()
+}
+
+fn get_pages_count(client: &Client, page_link: &String) -> u32 {
+    download::download_page(&client, page_link)
+        .and_then(|page| parse::parse_pages_count(&page))
+        .unwrap_or(1)
 }
 
 fn download_all_pages(client: &Client, link: &String, pages_count: u32) -> Vec<Document> {
