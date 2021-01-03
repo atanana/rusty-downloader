@@ -21,7 +21,7 @@ fn main() {
     }
 }
 
-fn parse_args() -> Result<(String, String, String), Box<Error>> {
+fn parse_args() -> Result<(String, String, String), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     let page_link: String = args[1].parse()?;
     let download_link: String = args[2].parse()?;
