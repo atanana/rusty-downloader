@@ -31,9 +31,7 @@ fn parse_args() -> Result<(String, String, String), Box<dyn Error>> {
 
 fn download_videos(page_link: &String, download_link: &String, folder_name: &String) {
     let client = Client::new();
-    let pages_count = download::download_page(&client, &page_link)
-        .and_then(|page| parse::parse_pages_count(&page))
-        .unwrap_or(1);
+    let pages_count = get_pages_count(&client, page_link);
     fs::create_dir_all(Path::new(folder_name))
         .expect("Cannot create folder for downloads");
     let video_ids = get_video_ids(&client, page_link, pages_count);
@@ -46,6 +44,12 @@ fn download_videos(page_link: &String, download_link: &String, folder_name: &Str
                 _ => println!("Cannot download {}", video_id)
             }
         })
+}
+
+fn get_pages_count(client: &Client, page_link: &String) -> u32 {
+    download::download_page(&client, page_link)
+        .and_then(|page| parse::parse_pages_count(&page))
+        .unwrap_or(1)
 }
 
 fn get_video_ids(client: &Client, link: &String, pages_count: u32) -> Vec<u32> {

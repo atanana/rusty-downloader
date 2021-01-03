@@ -22,18 +22,6 @@ struct DownloadResponse {
     zona: bool,
 }
 
-fn get_download_link(client: &Client, download_link: &String, video_id: &u32) -> Result<String, Box<dyn Error>> {
-    let params = [
-        ("id", video_id.to_string()),
-        ("type", String::from("mp4"))
-    ];
-    let mut response = client.post(download_link)
-        .form(&params)
-        .send()?;
-    let json: DownloadResponse = response.json()?;
-    return Ok(json.url);
-}
-
 pub fn download_video(client: &Client, download_link: &String, video_id: &u32, folder_name: &String) -> Result<String, Box<dyn Error>> {
     let file_name = format!("{}.mp4", video_id);
     let file_path = Path::new(folder_name).join(&file_name);
@@ -50,4 +38,16 @@ pub fn download_video(client: &Client, download_link: &String, video_id: &u32, f
     copy(&mut response, &mut tmp_file)?;
     rename(tmp_path, file_path)?;
     return Ok(file_name);
+}
+
+fn get_download_link(client: &Client, download_link: &String, video_id: &u32) -> Result<String, Box<dyn Error>> {
+    let params = [
+        ("id", video_id.to_string()),
+        ("type", String::from("mp4"))
+    ];
+    let mut response = client.post(download_link)
+        .form(&params)
+        .send()?;
+    let json: DownloadResponse = response.json()?;
+    return Ok(json.url);
 }
