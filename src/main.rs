@@ -11,6 +11,7 @@ use std::fs;
 use std::path::Path;
 use std::error::Error;
 use rayon::prelude::*;
+use std::sync::{Arc, Mutex};
 
 fn main() {
     match parse_args() {
@@ -34,12 +35,16 @@ fn download_videos(page_link: &String, download_link: &String, folder_name: &Str
     fs::create_dir_all(Path::new(folder_name))
         .expect("Cannot create folder for downloads");
     let video_ids = get_video_ids(&client, page_link);
-    println!("Downloading {} videos", video_ids.len());
+    let videos_count = video_ids.len();
+    println!("Downloading {} videos", videos_count);
+
+    let counter = Arc::new(Mutex::new(0u32));
     video_ids.par_iter()
-        .for_each(|video_id| {
-            println!("Start download video {}", video_id);
+        .for_each_with(counter, |counter, video_id| {
+            let current = get_current(counter);
+            println!("Start download video {} ({} of {})", video_id, current, videos_count);
             match download::download_video(&client, download_link, &video_id, folder_name) {
-                Ok(file_name) => println!("Downloaded to {}", file_name),
+                Ok(file_name) => println!("Downloaded to {}  ({} of {})", file_name, current, videos_count),
                 _ => println!("Cannot download {}", video_id)
             }
         })
@@ -65,4 +70,10 @@ fn download_all_pages(client: &Client, link: &String, pages_count: u32) -> Vec<D
         .map(|page_link| download::download_page(client, &page_link))
         .filter_map(|r| r)
         .collect()
+}
+
+fn get_current(counter: &Arc<Mutex<u32>>) -> u32 {
+    let mut current = counter.lock().unwrap();
+    *current += 1;
+    *current
 }
